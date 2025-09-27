@@ -1,0 +1,56 @@
+.pricing-page {
+  padding: 50px;
+  text-align: center;
+  color: #1e3c72;
+}
+
+.pricing-grid {
+  display: flex;
+  justify-content: center;
+  gap: 30px;
+  flex-wrap: wrap;
+  margin-top: 30px;
+}
+
+.pricing-card {
+  background: white;
+  padding: 30px;
+  border-radius: 20px;
+  box-shadow: 0 0 20px rgba(0,0,0,0.1);
+  transition: transform 0.3s;
+}
+
+.pricing-card:hover {
+  transform: translateY(-10px);
+}
+
+.pricing-card .price {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin: 10px 0;
+}
+
+.pricing-card ul {
+  list-style: none;
+  padding: 0;
+  margin: 10px 0;
+}
+
+.pricing-card ul li {
+  margin: 5px 0;
+}
+
+.pricing-card button {
+  padding: 10px 25px;
+  border: none;
+  border-radius: 30px;
+  background: linear-gradient(90deg, #1e3c72, #2a5298);
+  color: white;
+  cursor: pointer;
+  margin-top: 10px;
+  transition: 0.3s;
+}
+
+.pricing-card button:hover {
+  background: linear-gradient(90deg, #00c6ff, #0072ff);
+}

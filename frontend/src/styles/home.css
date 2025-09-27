@@ -1,0 +1,55 @@
+.home-page {
+  position: relative;
+  height: calc(100vh - 70px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  color: white;
+  overflow: hidden;
+}
+
+.home-content h1 {
+  font-size: 3rem;
+  margin-bottom: 20px;
+  text-shadow: 0 0 15px #00c6ff;
+  animation: fadeInDown 2s ease forwards;
+}
+
+.home-content p {
+  font-size: 1.5rem;
+  margin-bottom: 30px;
+  text-shadow: 0 0 10px #00c6ff;
+  animation: fadeInUp 2s ease forwards;
+}
+
+.cta-btn {
+  padding: 12px 30px;
+  font-size: 1.2rem;
+  border: none;
+  border-radius: 30px;
+  background: linear-gradient(90deg, #1e3c72, #2a5298);
+  color: white;
+  cursor: pointer;
+  transition: 0.3s;
+  animation: fadeIn 2.5s ease forwards;
+}
+
+.cta-btn:hover {
+  background: linear-gradient(90deg, #00c6ff, #0072ff);
+}
+
+@keyframes fadeInDown {
+  0% { opacity: 0; transform: translateY(-50px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeInUp {
+  0% { opacity: 0; transform: translateY(50px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeIn {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
+}

@@ -1,0 +1,110 @@
+/* LandingPage.css */
+
+/* Full-page background */
+.landing-page {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  background-image: url('/images/bg.jpg'); /* make sure in public/images */
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+}
+
+/* Dark overlay for readability */
+.landing-page::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  z-index: 1;
+}
+
+/* Content box */
+.container {
+  position: relative;
+  z-index: 2;
+  background: rgba(0,0,0,0.85);
+  padding: 50px 35px;
+  border-radius: 16px;
+  text-align: center;
+  color: #fff;
+  max-width: 420px;
+  width: 95%;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.7);
+  backdrop-filter: blur(6px);
+}
+
+/* Logo */
+.logo {
+  max-width: 120px;
+  margin: 0 auto 20px;
+  display: block;
+  border-radius: 12px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.5);
+}
+
+/* Heading + tagline */
+.container h1 {
+  font-size: 26px;
+  margin-bottom: 10px;
+  letter-spacing: 1px;
+  font-weight: 700;
+}
+
+.container p {
+  margin-bottom: 25px;
+  color: #d1d5db;
+  font-size: 15px;
+}
+
+/* Button group */
+.buttons {
+  display: flex;
+  gap: 18px;
+  flex-direction: column; /* stacked on small screens */
+}
+
+@media (min-width: 520px) {
+  .buttons {
+    flex-direction: row;
+    justify-content: center;
+  }
+}
+
+/* Buttons */
+button {
+  padding: 14px 20px;
+  border-radius: 12px;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 16px;
+  transition: transform 150ms ease, box-shadow 150ms ease;
+  flex: 1; /* equal width buttons */
+}
+
+/* Login button (primary) */
+button:first-child {
+  background: linear-gradient(135deg, #ff7a18 0%, #af002d 100%);
+  color: #fff;
+}
+button:first-child:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 28px rgba(175,0,45,0.25);
+}
+
+/* Register button (secondary) */
+button:last-child {
+  background: transparent;
+  color: #ffb38a;
+  border: 2px solid rgba(255,122,24,0.9);
+}
+button:last-child:hover {
+  background: rgba(255,122,24,0.12);
+  transform: translateY(-3px);
+}
