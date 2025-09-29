@@ -4,6 +4,10 @@
   color: #1e3c72;
 }
 
+.pricing-page h2 {
+  color: white; /* change only the main heading */
+}
+
 .pricing-grid {
   display: flex;
   justify-content: center;

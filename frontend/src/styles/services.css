@@ -1,7 +1,11 @@
 .services-page {
   padding: 50px;
   text-align: center;
-  color: #1e3c72;
+  color: #1e3c72; /* default text color for other elements */
+}
+
+.services-page h2 {
+  color: white; /* change only the main heading */
 }
 
 .services-grid {

@@ -6,24 +6,25 @@ export default function OurServices() {
       <h2>Our Services</h2>
       <div className="services-grid">
         <div className="service-card">
-          <img src={process.env.PUBLIC_URL + '/images/service1.png'} alt="SEO"/>
-          <h3>SEO Optimization</h3>
+          <h3>Video Editing</h3>
         </div>
         <div className="service-card">
-          <img src={process.env.PUBLIC_URL + '/images/service2.png'} alt="Social Media"/>
-          <h3>Social Media Marketing</h3>
+          <h3>graphic Designing </h3>
         </div>
         <div className="service-card">
-          <img src={process.env.PUBLIC_URL + '/images/service3.png'} alt="Analytics"/>
-          <h3>Analytics & Reports</h3>
+          <h3>Performance Marketing</h3>
         </div>
         <div className="service-card">
-          <img src={process.env.PUBLIC_URL + '/images/service4.jpg'} alt="Creative"/>
-          <h3>Creative Campaigns</h3>
+          <h3>Logo Designing</h3>
         </div>
         <div className="service-card">
-          <img src={process.env.PUBLIC_URL + '/images/service5.jpg'} alt="PPC"/>
-          <h3>PPC Advertising</h3>
+          <h3>3D Motion Graphic</h3>
+        </div>
+        <div className="service-card">
+          <h3>VFX</h3>
+        </div>
+        <div className="service-card">
+          <h3>Social Media Management</h3>
         </div>
       </div>
     </div>

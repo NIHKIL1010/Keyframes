@@ -1,4 +1,4 @@
-.home-page {
+/*.home-page {
   position: relative;
   height: calc(100vh - 70px);
   display: flex;
@@ -37,6 +37,79 @@
 
 .cta-btn:hover {
   background: linear-gradient(90deg, #00c6ff, #0072ff);
+}
+
+@keyframes fadeInDown {
+  0% { opacity: 0; transform: translateY(-50px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeInUp {
+  0% { opacity: 0; transform: translateY(50px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeIn {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
+}
+*/
+
+.home-page {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  overflow: visible;
+  color: white;
+}
+
+/* Overlay to make text readable */
+.home-overlay {
+  position: fixed; /* stays behind content but over bg */
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.4);
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* Foreground content */
+.home-content {
+  position: relative;
+  z-index: 10; /* ensures content is above bg and overlay */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.home-content h1 {
+  font-size: 3rem;
+  margin-bottom: 20px;
+  text-shadow: 0 0 15px #00c6ff;
+  animation: fadeInDown 2s ease forwards;
+}
+
+.home-content p {
+  font-size: 1.5rem;
+  margin-bottom: 30px;
+  text-shadow: 0 0 10px #00c6ff;
+  animation: fadeInUp 2s ease forwards;
+}
+
+.cta-btn, .animated-btn {
+  padding: 12px 30px;
+  font-size: 1.2rem;
+  border: none;
+  border-radius: 30px;
+  color: white;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  animation: fadeIn 2.5s ease forwards;
 }
 
 @keyframes fadeInDown {

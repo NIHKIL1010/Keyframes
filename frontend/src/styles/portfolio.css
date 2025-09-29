@@ -1,15 +1,27 @@
 .portfolio-page {
   padding: 50px;
   text-align: center;
-  color: #1e3c72;
+  color: #294c8b;
 }
 
+
+.portfolio-page h2 {
+  color: white; /* change only the main heading */
+}
 .portfolio-grid {
   display: flex;
   justify-content: center;
   gap: 30px;
   flex-wrap: wrap;
   margin-top: 30px;
+}
+
+.portfolio-card {
+  background: white;
+  padding: 20px;
+  border-radius: 15px;
+  box-shadow: 0 0 15px rgba(0,0,0,0.1);
+  transition: transform 0.3s;
 }
 
 .portfolio-card {
