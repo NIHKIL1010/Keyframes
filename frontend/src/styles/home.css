@@ -1,60 +1,3 @@
-/*.home-page {
-  position: relative;
-  height: calc(100vh - 70px);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  text-align: center;
-  color: white;
-  overflow: hidden;
-}
-
-.home-content h1 {
-  font-size: 3rem;
-  margin-bottom: 20px;
-  text-shadow: 0 0 15px #00c6ff;
-  animation: fadeInDown 2s ease forwards;
-}
-
-.home-content p {
-  font-size: 1.5rem;
-  margin-bottom: 30px;
-  text-shadow: 0 0 10px #00c6ff;
-  animation: fadeInUp 2s ease forwards;
-}
-
-.cta-btn {
-  padding: 12px 30px;
-  font-size: 1.2rem;
-  border: none;
-  border-radius: 30px;
-  background: linear-gradient(90deg, #1e3c72, #2a5298);
-  color: white;
-  cursor: pointer;
-  transition: 0.3s;
-  animation: fadeIn 2.5s ease forwards;
-}
-
-.cta-btn:hover {
-  background: linear-gradient(90deg, #00c6ff, #0072ff);
-}
-
-@keyframes fadeInDown {
-  0% { opacity: 0; transform: translateY(-50px); }
-  100% { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes fadeInUp {
-  0% { opacity: 0; transform: translateY(50px); }
-  100% { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes fadeIn {
-  0% { opacity: 0; }
-  100% { opacity: 1; }
-}
-*/
-
 .home-page {
   position: relative;
   min-height: 100vh;
@@ -64,11 +7,16 @@
   text-align: center;
   overflow: visible;
   color: white;
+
+  /* Gradient background instead of image */
+  background: linear-gradient(135deg, #6a11cb, #2575fc);
+  background-size: cover;
+  background-position: center;
 }
 
-/* Overlay to make text readable */
+/* Overlay to improve text readability */
 .home-overlay {
-  position: fixed; /* stays behind content but over bg */
+  position: fixed;
   top: 0;
   left: 0;
   width: 100%;
@@ -81,7 +29,7 @@
 /* Foreground content */
 .home-content {
   position: relative;
-  z-index: 10; /* ensures content is above bg and overlay */
+  z-index: 10;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -101,6 +49,7 @@
   animation: fadeInUp 2s ease forwards;
 }
 
+/* Button styling */
 .cta-btn, .animated-btn {
   padding: 12px 30px;
   font-size: 1.2rem;
@@ -112,6 +61,7 @@
   animation: fadeIn 2.5s ease forwards;
 }
 
+/* Animations */
 @keyframes fadeInDown {
   0% { opacity: 0; transform: translateY(-50px); }
   100% { opacity: 1; transform: translateY(0); }
@@ -125,4 +75,11 @@
 @keyframes fadeIn {
   0% { opacity: 0; }
   100% { opacity: 1; }
+}
+
+/* Optional: services section placeholder for scroll target */
+.our-services-section {
+  min-height: 100vh;
+  padding: 80px 20px;
+  background-color: #f5f5f5; /* light section background */
 }
