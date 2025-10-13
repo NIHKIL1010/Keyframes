@@ -69,3 +69,20 @@ server.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
 const paymentRoutes = require("./routes/payment");
 app.use("/api/payment", paymentRoutes);
 app.use("/uploads", express.static("uploads")); // serve uploaded screenshots
+
+//notification io socket
+io.on("connection", (socket) => {
+  console.log("🟢 A user connected:", socket.id);
+
+  // When frontend connects, it should send its userId once
+  socket.on("register-user", (userId) => {
+    if (userId) {
+      socket.join(userId);
+      console.log(`📡 User ${userId} joined their personal room`);
+    }
+  });
+
+  socket.on("disconnect", () => {
+    console.log("🔴 A user disconnected:", socket.id);
+  });
+});

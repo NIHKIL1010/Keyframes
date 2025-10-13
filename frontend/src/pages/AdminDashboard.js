@@ -17,28 +17,27 @@
 //     blockedUsers: 0,
 //     recentActivities: [],
 //   });
+//   const [searchTerm, setSearchTerm] = useState("");
 
 //   const userId = localStorage.getItem("userId");
+//   const token = localStorage.getItem("token");
 
 //   // ------------------ SOCKET.IO ------------------
 //   useEffect(() => {
 //     const socket = io("http://localhost:5000");
 
-//     socket.on("connect", () => {
-//       console.log("✅ Admin connected to socket.io");
-//     });
+//     socket.emit("register-user", userId);
 
 //     socket.on("new-notification", (notification) => {
 //       if (
 //         notification.type === "global" ||
-//         (notification.type === "personal" && notification.user === userId)
+//         (notification.type === "personal" && notification.user?.toString() === userId)
 //       ) {
-//         setNotifications((prev) => [notification, ...prev]);
+//         setNotifications((prev) => {
+//           if (prev.some((n) => n._id === notification._id)) return prev;
+//           return [notification, ...prev];
+//         });
 //       }
-//     });
-
-//     socket.on("disconnect", () => {
-//       console.log("❌ Socket disconnected");
 //     });
 
 //     return () => socket.disconnect();
@@ -47,7 +46,6 @@
 //   // ------------------ Fetch Functions ------------------
 //   const fetchUsers = async () => {
 //     try {
-//       const token = localStorage.getItem("token");
 //       const res = await axios.get("http://localhost:5000/api/admin/users", {
 //         headers: { Authorization: `Bearer ${token}` },
 //       });
@@ -59,7 +57,6 @@
 
 //   const fetchInsights = async () => {
 //     try {
-//       const token = localStorage.getItem("token");
 //       const res = await axios.get("http://localhost:5000/api/admin/insights", {
 //         headers: { Authorization: `Bearer ${token}` },
 //       });
@@ -71,13 +68,15 @@
 
 //   const fetchNotifications = async () => {
 //     try {
-//       const token = localStorage.getItem("token");
-//       const userId = localStorage.getItem("userId");
-//       const res = await axios.get(
-//         `http://localhost:5000/api/notifications/${userId}`,
-//         { headers: { Authorization: `Bearer ${token}` } }
-//       );
-//       if (res.data.success) setNotifications(res.data.notifications);
+//       const res = await axios.get(`http://localhost:5000/api/notifications/${userId}`, {
+//         headers: { Authorization: `Bearer ${token}` },
+//       });
+//       if (res.data.success) {
+//         const sorted = res.data.notifications.sort(
+//           (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+//         );
+//         setNotifications(sorted);
+//       }
 //     } catch (err) {
 //       console.error("Error fetching notifications:", err);
 //     }
@@ -92,7 +91,6 @@
 //   // ------------------ Actions ------------------
 //   const handleBlock = async (userId) => {
 //     try {
-//       const token = localStorage.getItem("token");
 //       await axios.patch(
 //         `http://localhost:5000/api/admin/users/${userId}/block`,
 //         {},
@@ -107,7 +105,6 @@
 
 //   const handleRoleChange = async (userId, currentRole) => {
 //     try {
-//       const token = localStorage.getItem("token");
 //       const newRole = currentRole === "user" ? "admin" : "user";
 //       await axios.patch(
 //         `http://localhost:5000/api/admin/users/${userId}/role`,
@@ -124,17 +121,14 @@
 //   const sendNotification = async () => {
 //     try {
 //       if (!notificationMessage.trim()) return alert("Please enter a message");
-//       const token = localStorage.getItem("token");
 
 //       if (selectedUser) {
-//         // Personal notification
 //         await axios.post(
 //           `http://localhost:5000/api/notifications/personal/${selectedUser}`,
 //           { message: notificationMessage },
 //           { headers: { Authorization: `Bearer ${token}` } }
 //         );
 //       } else {
-//         // Global notification
 //         await axios.post(
 //           `http://localhost:5000/api/notifications/global`,
 //           { message: notificationMessage },
@@ -152,13 +146,26 @@
 //     }
 //   };
 
-//   // ------------------ Logout ------------------
 //   const handleLogout = () => {
 //     localStorage.clear();
 //     window.location.href = "/login";
 //   };
 
 //   // ------------------ Render ------------------
+//   const filteredUsers = users.filter(
+//     (u) =>
+//       u.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+//       u.email.toLowerCase().includes(searchTerm.toLowerCase())
+//   );
+
+//   const timeAgo = (dateStr) => {
+//     const diff = (new Date() - new Date(dateStr)) / 1000;
+//     if (diff < 60) return `${Math.floor(diff)} sec ago`;
+//     if (diff < 3600) return `${Math.floor(diff / 60)} min ago`;
+//     if (diff < 86400) return `${Math.floor(diff / 3600)} hr ago`;
+//     return `${Math.floor(diff / 86400)} d ago`;
+//   };
+
 //   return (
 //     <div className="admin-dashboard">
 //       <header className="dashboard-header">
@@ -198,7 +205,8 @@
 //                       <strong>{act.action}</strong> by{" "}
 //                       <strong>{act.performedBy.name}</strong> (
 //                       {act.performedBy.email}) on{" "}
-//                       <strong>{act.user.name}</strong> ({act.user.email})
+//                       <strong>{act.user.name}</strong> ({act.user.email}) -{" "}
+//                       <em>{timeAgo(act.createdAt)}</em>
 //                     </p>
 //                   </div>
 //                 ))}
@@ -231,11 +239,16 @@
 //               Send
 //             </button>
 
-//             <div className="notifications-list">
-//               {notifications.map((n, idx) => (
-//                 <div key={idx} className={`notification ${n.type}`}>
+//             <div className="notifications-list scrollable">
+//               {notifications.map((n) => (
+//                 <div
+//                   key={n._id}
+//                   className={`notification ${n.type} ${
+//                     !n.readBy?.includes(userId) ? "unread" : ""
+//                   }`}
+//                 >
 //                   {n.type === "personal" ? "(Personal) " : "(Global) "}{" "}
-//                   {n.message}
+//                   {n.message} <span className="notif-time">{timeAgo(n.createdAt)}</span>
 //                 </div>
 //               ))}
 //             </div>
@@ -246,6 +259,13 @@
 //       {/* Users Management */}
 //       <section className="users-management">
 //         <h2>Users Management</h2>
+//         <input
+//           type="text"
+//           placeholder="Search by name/email..."
+//           value={searchTerm}
+//           onChange={(e) => setSearchTerm(e.target.value)}
+//           className="user-search"
+//         />
 //         <table>
 //           <thead>
 //             <tr>
@@ -256,7 +276,7 @@
 //             </tr>
 //           </thead>
 //           <tbody>
-//             {users.map((user) => (
+//             {filteredUsers.map((user) => (
 //               <tr key={user._id}>
 //                 <td>{user.name}</td>
 //                 <td>{user.email}</td>
@@ -265,9 +285,7 @@
 //                   <button onClick={() => handleBlock(user._id)}>
 //                     {user.isBlocked ? "Unblock" : "Block"}
 //                   </button>
-//                   <button
-//                     onClick={() => handleRoleChange(user._id, user.role)}
-//                   >
+//                   <button onClick={() => handleRoleChange(user._id, user.role)}>
 //                     Toggle Role
 //                   </button>
 //                 </td>
@@ -296,7 +314,11 @@ export default function AdminDashboard() {
     activeUsers: 0,
     blockedUsers: 0,
     recentActivities: [],
+    newUsersToday: 0,
+    pendingApprovals: 0,
   });
+  const [activityFilter, setActivityFilter] = useState("all");
+  const [userFilter, setUserFilter] = useState("all");
 
   const userId = localStorage.getItem("userId");
   const token = localStorage.getItem("token");
@@ -304,11 +326,8 @@ export default function AdminDashboard() {
   // ------------------ SOCKET.IO ------------------
   useEffect(() => {
     const socket = io("http://localhost:5000");
-
-    // Register admin for potential notifications (optional)
     socket.emit("register-user", userId);
 
-    // Receive new notifications
     socket.on("new-notification", (notification) => {
       if (
         notification.type === "global" ||
@@ -321,6 +340,8 @@ export default function AdminDashboard() {
       }
     });
 
+    socket.on("update-insights", (updated) => setInsights(updated));
+
     return () => socket.disconnect();
   }, [userId]);
 
@@ -332,7 +353,7 @@ export default function AdminDashboard() {
       });
       setUsers(res.data);
     } catch (err) {
-      console.error("Error fetching users:", err);
+      console.error("Error fetching users:", err.response?.data || err.message);
     }
   };
 
@@ -343,7 +364,7 @@ export default function AdminDashboard() {
       });
       setInsights(res.data);
     } catch (err) {
-      console.error("Error fetching insights:", err);
+      console.error("Error fetching insights:", err.response?.data || err.message);
     }
   };
 
@@ -359,7 +380,7 @@ export default function AdminDashboard() {
         setNotifications(sorted);
       }
     } catch (err) {
-      console.error("Error fetching notifications:", err);
+      console.error("Error fetching notifications:", err.response?.data || err.message);
     }
   };
 
@@ -380,7 +401,7 @@ export default function AdminDashboard() {
       fetchUsers();
       fetchInsights();
     } catch (err) {
-      console.error("Error blocking/unblocking user:", err);
+      console.error("Error blocking/unblocking user:", err.response?.data || err.message);
     }
   };
 
@@ -395,7 +416,7 @@ export default function AdminDashboard() {
       fetchUsers();
       fetchInsights();
     } catch (err) {
-      console.error("Error changing role:", err);
+      console.error("Error changing role:", err.response?.data || err.message);
     }
   };
 
@@ -403,33 +424,37 @@ export default function AdminDashboard() {
     try {
       if (!notificationMessage.trim()) return alert("Please enter a message");
 
-      if (selectedUser) {
-        // Personal notification
-        await axios.post(
-          `http://localhost:5000/api/notifications/personal/${selectedUser}`,
-          { message: notificationMessage },
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-      } else {
-        // Global notification
-        await axios.post(
-          `http://localhost:5000/api/notifications/global`,
-          { message: notificationMessage },
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-      }
+      const url = selectedUser
+        ? `http://localhost:5000/api/notifications/personal/${selectedUser}`
+        : `http://localhost:5000/api/notifications/global`;
 
-      setNotificationMessage("");
-      setSelectedUser("");
-      fetchNotifications();
-      alert("✅ Notification sent successfully!");
+      const res = await axios.post(
+        url,
+        { message: notificationMessage },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      if (res.data.success) {
+        setNotificationMessage("");
+        setSelectedUser("");
+        fetchNotifications();
+        alert("✅ Notification sent successfully!");
+      } else {
+        console.error("Backend rejected request:", res.data);
+        alert("❌ Failed: " + res.data.error || res.data.message);
+      }
     } catch (err) {
-      console.error("Error sending notification:", err);
-      alert("❌ Failed to send notification.");
+      console.error("Error sending notification:", err.response?.data || err.message);
+      alert("❌ Failed to send notification. Check console for details.");
     }
   };
 
-  // ------------------ Logout ------------------
+  const markAllRead = () => {
+    setNotifications((prev) =>
+      prev.map((n) => ({ ...n, read: true }))
+    );
+  };
+
   const handleLogout = () => {
     localStorage.clear();
     window.location.href = "/login";
@@ -440,9 +465,14 @@ export default function AdminDashboard() {
     <div className="admin-dashboard">
       <header className="dashboard-header">
         <h1>Admin Dashboard</h1>
-        <button className="logout-btn" onClick={handleLogout}>
-          Logout
-        </button>
+        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+          <button className="primary-btn" onClick={markAllRead}>
+            Mark all notifications read
+          </button>
+          <button className="logout-btn" onClick={handleLogout}>
+            Logout
+          </button>
+        </div>
       </header>
 
       <div className="dashboard-grid">
@@ -461,15 +491,32 @@ export default function AdminDashboard() {
               <h3>Blocked Users</h3>
               <p>{insights.blockedUsers}</p>
             </div>
+            <div className="card new-users-today">
+              <h3>New Users Today</h3>
+              <p>{insights.newUsersToday || 0}</p>
+            </div>
+            <div className="card pending-approvals">
+              <h3>Pending Approvals</h3>
+              <p>{insights.pendingApprovals || 0}</p>
+            </div>
           </section>
 
           <section className="recent-activity-section">
             <h2>Recent Activity Logs</h2>
-            {insights.recentActivities.length === 0 ? (
-              <p>No recent activity.</p>
-            ) : (
-              <div className="activity-list">
-                {insights.recentActivities.map((act) => (
+            <select
+              value={activityFilter}
+              onChange={(e) => setActivityFilter(e.target.value)}
+            >
+              <option value="all">All Actions</option>
+              <option value="block">Block/Unblock</option>
+              <option value="role">Role Change</option>
+            </select>
+            <div className="activity-list">
+              {insights.recentActivities
+                .filter((act) =>
+                  activityFilter === "all" ? true : act.action.includes(activityFilter)
+                )
+                .map((act) => (
                   <div key={act._id} className="activity-item">
                     <p>
                       <strong>{act.action}</strong> by{" "}
@@ -479,8 +526,12 @@ export default function AdminDashboard() {
                     </p>
                   </div>
                 ))}
-              </div>
-            )}
+            </div>
+          </section>
+
+          <section className="analytics-section">
+            <h2>Analytics</h2>
+            <div className="analytics-placeholder">[Charts/Graphs placeholder]</div>
           </section>
         </div>
 
@@ -510,8 +561,17 @@ export default function AdminDashboard() {
 
             <div className="notifications-list">
               {notifications.map((n) => (
-                <div key={n._id} className={`notification ${n.type}`}>
+                <div
+                  key={n._id}
+                  className={`notification ${n.type} ${n.read ? "" : "unread"}`}
+                >
+                  <span style={{ marginRight: "5px" }}>
+                    {n.type === "personal" ? "👤" : "🌐"}
+                  </span>
                   {n.type === "personal" ? "(Personal) " : "(Global) "} {n.message}
+                  <span className="notif-time">
+                    {new Date(n.createdAt).toLocaleString()}
+                  </span>
                 </div>
               ))}
             </div>
@@ -519,9 +579,17 @@ export default function AdminDashboard() {
         </div>
       </div>
 
-      {/* Users Management */}
       <section className="users-management">
         <h2>Users Management</h2>
+        <select
+          value={userFilter}
+          onChange={(e) => setUserFilter(e.target.value)}
+        >
+          <option value="all">All Users</option>
+          <option value="user">User</option>
+          <option value="admin">Admin</option>
+          <option value="blocked">Blocked</option>
+        </select>
         <table>
           <thead>
             <tr>
@@ -532,21 +600,27 @@ export default function AdminDashboard() {
             </tr>
           </thead>
           <tbody>
-            {users.map((user) => (
-              <tr key={user._id}>
-                <td>{user.name}</td>
-                <td>{user.email}</td>
-                <td>{user.role}</td>
-                <td>
-                  <button onClick={() => handleBlock(user._id)}>
-                    {user.isBlocked ? "Unblock" : "Block"}
-                  </button>
-                  <button onClick={() => handleRoleChange(user._id, user.role)}>
-                    Toggle Role
-                  </button>
-                </td>
-              </tr>
-            ))}
+            {users
+              .filter((u) => {
+                if (userFilter === "all") return true;
+                if (userFilter === "blocked") return u.isBlocked;
+                return u.role === userFilter;
+              })
+              .map((user) => (
+                <tr key={user._id}>
+                  <td>{user.name}</td>
+                  <td>{user.email}</td>
+                  <td>{user.role}</td>
+                  <td>
+                    <button onClick={() => handleBlock(user._id)}>
+                      {user.isBlocked ? "Unblock" : "Block"}
+                    </button>
+                    <button onClick={() => handleRoleChange(user._id, user.role)}>
+                      Toggle Role
+                    </button>
+                  </td>
+                </tr>
+              ))}
           </tbody>
         </table>
       </section>

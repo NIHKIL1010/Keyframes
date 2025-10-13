@@ -1,13 +1,4 @@
-// const router = require("express").Router();
-// const authMiddleware = require("../middleware/authMiddleware");
 
-// // GET current user
-// router.get("/me", authMiddleware, (req, res) => {
-//   // user info comes from token
-//   res.json({ name: req.user.name, email: req.user.email });
-// });
-
-// module.exports = router;
 
 const router = require("express").Router();
 const { verifyToken } = require("../middleware/authMiddleware"); // <-- destructure the function

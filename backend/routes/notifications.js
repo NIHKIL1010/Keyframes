@@ -12,23 +12,15 @@
 //     if (!message)
 //       return res.status(400).json({ success: false, error: "Message required" });
 
-//     const notification = new Notification({
-//       message,
-//       type: "global",
-//     });
+//     const notification = new Notification({ message, type: "global" });
 //     await notification.save();
 
-//     // Emit to all connected users
 //     if (req.io) {
-//       req.io.emit("new-notification", {
-//         ...notification.toObject(),
-//         user: null,
-//       });
+//       req.io.emit("new-notification", { ...notification.toObject(), user: null });
 //     }
 
 //     res.status(201).json({ success: true, notification });
 //   } catch (err) {
-//     console.error(err);
 //     res.status(500).json({ success: false, error: err.message });
 //   }
 // });
@@ -39,25 +31,17 @@
 //     const { message } = req.body;
 //     const { userId } = req.params;
 //     if (!message || !userId)
-//       return res
-//         .status(400)
-//         .json({ success: false, error: "Message & userId required" });
+//       return res.status(400).json({ success: false, error: "Message & userId required" });
 
-//     const notification = new Notification({
-//       message,
-//       type: "personal",
-//       user: userId,
-//     });
+//     const notification = new Notification({ message, type: "personal", user: userId });
 //     await notification.save();
 
-//     // Emit only to the specific user (via room)
 //     if (req.io) {
 //       req.io.to(userId).emit("new-notification", notification);
 //     }
 
 //     res.status(201).json({ success: true, notification });
 //   } catch (err) {
-//     console.error(err);
 //     res.status(500).json({ success: false, error: err.message });
 //   }
 // });
@@ -66,12 +50,14 @@
 // router.get("/:userId", async (req, res) => {
 //   try {
 //     const { userId } = req.params;
+
 //     const notifications = await Notification.find({
 //       $or: [
 //         { type: "global" },
 //         { type: "personal", user: userId },
 //       ],
-//     }).sort({ createdAt: -1 });
+//     })
+//       .sort({ createdAt: -1 });
 
 //     res.json({ success: true, notifications });
 //   } catch (err) {
@@ -80,6 +66,7 @@
 // });
 
 // module.exports = router;
+
 
 const express = require("express");
 const router = express.Router();
@@ -100,9 +87,10 @@ router.post("/global", verifyAdmin, async (req, res) => {
       req.io.emit("new-notification", { ...notification.toObject(), user: null });
     }
 
-    res.status(201).json({ success: true, notification });
+    return res.status(201).json({ success: true, notification });
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    console.error("Error in /global notification:", err);
+    return res.status(500).json({ success: false, error: err.message });
   }
 });
 
@@ -121,9 +109,10 @@ router.post("/personal/:userId", verifyAdmin, async (req, res) => {
       req.io.to(userId).emit("new-notification", notification);
     }
 
-    res.status(201).json({ success: true, notification });
+    return res.status(201).json({ success: true, notification });
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    console.error("Error in /personal notification:", err);
+    return res.status(500).json({ success: false, error: err.message });
   }
 });
 
@@ -131,19 +120,19 @@ router.post("/personal/:userId", verifyAdmin, async (req, res) => {
 router.get("/:userId", async (req, res) => {
   try {
     const { userId } = req.params;
-
     const notifications = await Notification.find({
       $or: [
         { type: "global" },
         { type: "personal", user: userId },
       ],
-    })
-      .sort({ createdAt: -1 });
+    }).sort({ createdAt: -1 });
 
-    res.json({ success: true, notifications });
+    return res.json({ success: true, notifications });
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    console.error("Error fetching notifications:", err);
+    return res.status(500).json({ success: false, error: err.message });
   }
 });
 
 module.exports = router;
+
