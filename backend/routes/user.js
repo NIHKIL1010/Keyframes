@@ -10,17 +10,16 @@
 // module.exports = router;
 
 const router = require("express").Router();
-const authMiddleware = require("../middleware/authMiddleware");
+const { verifyToken } = require("../middleware/authMiddleware"); // <-- destructure the function
 
 // GET current user info
-router.get("/me", authMiddleware, (req, res) => {
-  res.json({ 
+router.get("/me", verifyToken, (req, res) => {
+  res.json({
     id: req.user.id,
     name: req.user.name,
     email: req.user.email,
-    role: req.user.role || "user"
+    role: req.user.role || "user",
   });
 });
 
 module.exports = router;
-
