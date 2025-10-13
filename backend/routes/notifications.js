@@ -1,47 +1,47 @@
 
+
 // const express = require("express");
 // const router = express.Router();
 // const Notification = require("../models/Notification");
 // const { verifyAdmin } = require("../middleware/authMiddleware");
 
-// // ------------------------------
-// // Admin sends global notification
-// // ------------------------------
+// // ---------------- GLOBAL NOTIFICATION ----------------
 // router.post("/global", verifyAdmin, async (req, res) => {
 //   try {
 //     const { message } = req.body;
+//     if (!message)
+//       return res.status(400).json({ success: false, error: "Message required" });
 
-//     if (!message) {
-//       return res.status(400).json({ success: false, error: "Message is required" });
-//     }
-
-//     const notification = new Notification({ message, type: "global" });
+//     const notification = new Notification({
+//       message,
+//       type: "global",
+//     });
 //     await notification.save();
 
-//     // Real-time (if Socket.io is integrated)
-//     if (req.io) req.io.emit("new-notification", notification);
+//     // Emit to all connected users
+//     if (req.io) {
+//       req.io.emit("new-notification", {
+//         ...notification.toObject(),
+//         user: null,
+//       });
+//     }
 
 //     res.status(201).json({ success: true, notification });
 //   } catch (err) {
+//     console.error(err);
 //     res.status(500).json({ success: false, error: err.message });
 //   }
 // });
 
-// // ------------------------------
-// // Admin sends personal notification
-// // ------------------------------
+// // ---------------- PERSONAL NOTIFICATION ----------------
 // router.post("/personal/:userId", verifyAdmin, async (req, res) => {
 //   try {
 //     const { message } = req.body;
 //     const { userId } = req.params;
-
-//     if (!message) {
-//       return res.status(400).json({ success: false, error: "Message is required" });
-//     }
-
-//     if (!userId) {
-//       return res.status(400).json({ success: false, error: "userId is required for personal notifications" });
-//     }
+//     if (!message || !userId)
+//       return res
+//         .status(400)
+//         .json({ success: false, error: "Message & userId required" });
 
 //     const notification = new Notification({
 //       message,
@@ -50,21 +50,22 @@
 //     });
 //     await notification.save();
 
-//     if (req.io) req.io.emit("new-notification", notification);
+//     // Emit only to the specific user (via room)
+//     if (req.io) {
+//       req.io.to(userId).emit("new-notification", notification);
+//     }
 
 //     res.status(201).json({ success: true, notification });
 //   } catch (err) {
+//     console.error(err);
 //     res.status(500).json({ success: false, error: err.message });
 //   }
 // });
 
-// // ------------------------------
-// // Fetch notifications for a user (global + personal)
-// // ------------------------------
+// // ---------------- FETCH NOTIFICATIONS ----------------
 // router.get("/:userId", async (req, res) => {
 //   try {
 //     const { userId } = req.params;
-
 //     const notifications = await Notification.find({
 //       $or: [
 //         { type: "global" },
@@ -85,16 +86,19 @@ const router = express.Router();
 const Notification = require("../models/Notification");
 const { verifyAdmin } = require("../middleware/authMiddleware");
 
-// Admin sends global notification
+// ---------------- GLOBAL NOTIFICATION ----------------
 router.post("/global", verifyAdmin, async (req, res) => {
   try {
     const { message } = req.body;
-    if (!message) return res.status(400).json({ success: false, error: "Message required" });
+    if (!message)
+      return res.status(400).json({ success: false, error: "Message required" });
 
     const notification = new Notification({ message, type: "global" });
     await notification.save();
 
-    if (req.io) req.io.emit("new-notification", notification);
+    if (req.io) {
+      req.io.emit("new-notification", { ...notification.toObject(), user: null });
+    }
 
     res.status(201).json({ success: true, notification });
   } catch (err) {
@@ -102,17 +106,20 @@ router.post("/global", verifyAdmin, async (req, res) => {
   }
 });
 
-// Admin sends personal notification
+// ---------------- PERSONAL NOTIFICATION ----------------
 router.post("/personal/:userId", verifyAdmin, async (req, res) => {
   try {
     const { message } = req.body;
     const { userId } = req.params;
-    if (!message || !userId) return res.status(400).json({ success: false, error: "Message & userId required" });
+    if (!message || !userId)
+      return res.status(400).json({ success: false, error: "Message & userId required" });
 
     const notification = new Notification({ message, type: "personal", user: userId });
     await notification.save();
 
-    if (req.io) req.io.emit("new-notification", notification);
+    if (req.io) {
+      req.io.to(userId).emit("new-notification", notification);
+    }
 
     res.status(201).json({ success: true, notification });
   } catch (err) {
@@ -120,7 +127,7 @@ router.post("/personal/:userId", verifyAdmin, async (req, res) => {
   }
 });
 
-// Fetch notifications for a user (global + personal)
+// ---------------- FETCH NOTIFICATIONS ----------------
 router.get("/:userId", async (req, res) => {
   try {
     const { userId } = req.params;
@@ -130,7 +137,8 @@ router.get("/:userId", async (req, res) => {
         { type: "global" },
         { type: "personal", user: userId },
       ],
-    }).sort({ createdAt: -1 });
+    })
+      .sort({ createdAt: -1 });
 
     res.json({ success: true, notifications });
   } catch (err) {

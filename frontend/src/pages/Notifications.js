@@ -1,53 +1,129 @@
-// import '../styles/notifications.css';
-// export default function Notifications() {
-//   const notifications = [
-//     { id: 1, message: "New marketing campaign launched!" },
-//     { id: 2, message: "Your portfolio has been approved." },
-//     { id: 3, message: "Reminder: Meeting at 3 PM." }
-//   ];
 
+// import React, { useEffect, useState } from "react";
+// import axios from "axios";
+// import { io } from "socket.io-client";
+// import "../styles/global.css";
+// import "../styles/notifications.css";
+
+// export default function Notifications() {
+//   const [notifications, setNotifications] = useState([]);
+//   const userId = localStorage.getItem("userId"); // current logged-in user
+//   const token = localStorage.getItem("token");
+
+//   // ------------------ Fetch saved notifications ------------------
+//   const fetchNotifications = async () => {
+//     try {
+//       const res = await axios.get(`http://localhost:5000/api/notifications/${userId}`, {
+//         headers: { Authorization: `Bearer ${token}` },
+//       });
+
+//       if (res.data.success) {
+//         // Sort newest first
+//         const sorted = res.data.notifications.sort(
+//           (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+//         );
+//         setNotifications(sorted);
+//       }
+//     } catch (err) {
+//       console.error("Error fetching notifications:", err);
+//     }
+//   };
+
+//   // ------------------ Socket.IO for live updates ------------------
+//   useEffect(() => {
+//     fetchNotifications(); // initial DB fetch
+
+//     const socket = io("http://localhost:5000");
+//     socket.emit("register-user", userId); // register this user for personal notifications
+
+//     socket.on("new-notification", (notification) => {
+//       if (
+//         notification.type === "global" ||
+//         (notification.type === "personal" && notification.user?.toString() === userId)
+//       ) {
+//         setNotifications((prev) => {
+//           // Prevent duplicates if the same notification already exists
+//           const exists = prev.some((n) => n._id === notification._id);
+//           if (exists) return prev;
+//           return [notification, ...prev]; // add new one at top
+//         });
+//       }
+//     });
+
+//     return () => socket.disconnect();
+//   }, [userId]);
+
+//   // ------------------ Render ------------------
 //   return (
-//     <div className="page-content">
+//     <div className="notifications-page">
 //       <h2>Notifications</h2>
-//       <ul>
-//         {notifications.map((note) => (
-//           <li key={note.id}>{note.message}</li>
-//         ))}
-//       </ul>
+//       {notifications.length === 0 ? (
+//         <p>No notifications yet</p>
+//       ) : (
+//         <div className="notifications-list">
+//           {notifications.map((notif) => (
+//             <div
+//               key={notif._id || Math.random()}
+//               className={`notification-card ${notif.type}`}
+//             >
+//               <span className="notif-type">
+//                 {notif.type === "personal" ? "(Personal) " : "(Global) "}
+//               </span>
+//               {notif.message}
+//               <span className="notif-time">
+//                 {new Date(notif.createdAt).toLocaleString()}
+//               </span>
+//             </div>
+//           ))}
+//         </div>
+//       )}
 //     </div>
 //   );
 // }
 
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import "../styles/notifications.css";
 import { io } from "socket.io-client";
+import "../styles/global.css";
+import "../styles/notifications.css";
 
 export default function Notifications() {
   const [notifications, setNotifications] = useState([]);
-  const userId = localStorage.getItem("userId"); // ensure you store this at login
+  const userId = localStorage.getItem("userId");
+  const token = localStorage.getItem("token");
+
+  const fetchNotifications = async () => {
+    try {
+      const res = await axios.get(`http://localhost:5000/api/notifications/${userId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      if (res.data.success) {
+        const sorted = res.data.notifications.sort(
+          (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+        );
+        setNotifications(sorted);
+      }
+    } catch (err) {
+      console.error("Error fetching notifications:", err);
+    }
+  };
 
   useEffect(() => {
-    // Fetch notifications
-    const fetchNotifications = async () => {
-      try {
-        const res = await axios.get(`http://localhost:5000/api/notifications/${userId}`);
-        if (res.data.success) setNotifications(res.data.notifications);
-      } catch (err) {
-        console.error("Error fetching notifications:", err);
-      }
-    };
-
     fetchNotifications();
 
-    // Setup socket once
     const socket = io("http://localhost:5000");
+    socket.emit("register-user", userId);
+
     socket.on("new-notification", (notification) => {
       if (
         notification.type === "global" ||
-        (notification.type === "personal" && notification.user === userId)
+        (notification.type === "personal" && notification.user?.toString() === userId)
       ) {
-        setNotifications(prev => [notification, ...prev]);
+        setNotifications((prev) => {
+          if (prev.some((n) => n._id === notification._id)) return prev;
+          return [notification, ...prev];
+        });
       }
     });
 
@@ -55,18 +131,24 @@ export default function Notifications() {
   }, [userId]);
 
   return (
-    <div className="page-content">
+    <div className="notifications-page">
       <h2>Notifications</h2>
       {notifications.length === 0 ? (
-        <p>No notifications yet.</p>
+        <p>No notifications yet</p>
       ) : (
-        <ul>
-          {notifications.map((note) => (
-            <li key={note._id}>
-              {note.type === "personal" ? "(Personal) " : "(Global) "} {note.message}
-            </li>
+        <div className="notifications-list">
+          {notifications.map((notif) => (
+            <div key={notif._id} className={`notification-card ${notif.type}`}>
+              <span className="notif-type">
+                {notif.type === "personal" ? "(Personal) " : "(Global) "}
+              </span>
+              {notif.message}
+              <span className="notif-time">
+                {new Date(notif.createdAt).toLocaleString()}
+              </span>
+            </div>
           ))}
-        </ul>
+        </div>
       )}
     </div>
   );

@@ -1,4 +1,4 @@
-.page-content {
+/* .page-content {
   padding: 50px;
   color: #ffffffff;
 }
@@ -14,4 +14,53 @@
   padding: 15px;
   border-left: 5px solid #2a5298;
   border-radius: 5px;
+} */
+
+.notifications-page {
+  padding: 30px;
+  text-align: center;
+  color: #1e3c72;
+}
+
+.notifications-list {
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.notification-card {
+  padding: 15px 20px;
+  border-radius: 15px;
+  background: #f1f5f9; /* soft plain background */
+  text-align: left;
+  position: relative;
+  transition: transform 0.2s;
+}
+
+.notification-card:hover {
+  transform: translateY(-3px);
+}
+
+.notification-card.global {
+  border-left: 5px solid #1e3c72;
+}
+
+.notification-card.personal {
+  border-left: 5px solid #0072ff;
+}
+
+.notif-type {
+  font-weight: bold;
+}
+
+.notif-time {
+  font-size: 0.8rem;
+  color: #555;
+  position: absolute;
+  right: 15px;
+  top: 15px;
 }

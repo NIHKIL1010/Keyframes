@@ -1,13 +1,5 @@
 
-// const mongoose = require("mongoose");
 
-// const NotificationSchema = new mongoose.Schema({
-//   message: { type: String, required: true },
-//   type: { type: String, enum: ["global", "personal"], required: true },
-//   user: { type: mongoose.Schema.Types.ObjectId, ref: "User" }, // only for personal
-// }, { timestamps: true });
-
-// module.exports = mongoose.model("Notification", NotificationSchema);
 
 const mongoose = require("mongoose");
 
