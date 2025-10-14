@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
@@ -9,7 +8,13 @@ export default function PaymentForm() {
   const navigate = useNavigate();
   const selectedPlan = location.state?.planName || "No plan selected";
 
-  const [formData, setFormData] = useState({ name: "", email: "", phone: "", paymentDetails: "", screenshot: null });
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    paymentDetails: "",
+    screenshot: null,
+  });
   const [preview, setPreview] = useState(null);
   const [submitted, setSubmitted] = useState(false);
 
@@ -25,6 +30,7 @@ export default function PaymentForm() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     if (!formData.screenshot) {
       alert("Please upload payment screenshot!");
       return;
@@ -38,17 +44,17 @@ export default function PaymentForm() {
     data.append("plan", selectedPlan);
     data.append("screenshot", formData.screenshot);
 
-   try {
-  await axios.post(
-    `${process.env.REACT_APP_API_URL || "http://localhost:5000"}/api/payment`,
-    data
-  );
-  setSubmitted(true);
-} catch (err) {
-  console.error(err);
-  alert("Error submitting form. Try again.");
-}
-
+    try {
+      await axios.post(
+        `${process.env.REACT_APP_API_URL || "http://localhost:5000"}/api/payment`,
+        data
+      );
+      setSubmitted(true);
+    } catch (err) {
+      console.error("Payment submission error:", err.response?.data || err.message);
+      alert("Error submitting form. Try again.");
+    }
+  };
 
   if (submitted)
     return (
@@ -68,23 +74,55 @@ export default function PaymentForm() {
         <h2>Payment Form - <span>{selectedPlan}</span></h2>
         <form onSubmit={handleSubmit} className="payment-form">
           <label>Name</label>
-          <input type="text" name="name" value={formData.name} onChange={handleChange} required />
+          <input
+            type="text"
+            name="name"
+            value={formData.name}
+            onChange={handleChange}
+            required
+          />
 
           <label>Email</label>
-          <input type="email" name="email" value={formData.email} onChange={handleChange} required />
+          <input
+            type="email"
+            name="email"
+            value={formData.email}
+            onChange={handleChange}
+            required
+          />
 
           <label>Phone Number</label>
-          <input type="tel" name="phone" value={formData.phone} onChange={handleChange} required />
+          <input
+            type="tel"
+            name="phone"
+            value={formData.phone}
+            onChange={handleChange}
+            required
+          />
 
           <label>Payment Details</label>
-          <input type="text" name="paymentDetails" value={formData.paymentDetails} onChange={handleChange} required />
+          <input
+            type="text"
+            name="paymentDetails"
+            value={formData.paymentDetails}
+            onChange={handleChange}
+            required
+          />
 
           <label>Upload Payment Screenshot</label>
-          <input type="file" name="screenshot" accept="image/*" onChange={handleChange} required />
+          <input
+            type="file"
+            name="screenshot"
+            accept="image/*"
+            onChange={handleChange}
+            required
+          />
 
           {preview && <img src={preview} alt="Preview" className="screenshot-preview" />}
 
-          <button type="submit" disabled={!formData.screenshot}>Submit Payment</button>
+          <button type="submit" disabled={!formData.screenshot}>
+            Submit Payment
+          </button>
         </form>
       </div>
     </div>
