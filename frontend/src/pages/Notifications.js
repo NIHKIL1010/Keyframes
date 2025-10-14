@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const Notification = require("../models/Notification");
-const { verifyAdmin } = require("../middleware/authMiddleware");
+
 
 // ---------------- GLOBAL NOTIFICATION ----------------
 router.post("/global", verifyAdmin, async (req, res) => {
