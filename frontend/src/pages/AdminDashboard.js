@@ -23,7 +23,7 @@ export default function AdminDashboard() {
   const userId = localStorage.getItem("userId");
   const token = localStorage.getItem("token");
 
-  // Hosted backend URL
+  // ------------------ API URL ------------------
   const API_URL = process.env.REACT_APP_API_URL || "https://keyframes.onrender.com";
 
   // ------------------ SOCKET.IO ------------------
@@ -144,7 +144,7 @@ export default function AdminDashboard() {
         alert("✅ Notification sent successfully!");
       } else {
         console.error("Backend rejected request:", res.data);
-        alert("❌ Failed: " + (res.data.error || res.data.message));
+        alert("❌ Failed: " + res.data.error || res.data.message);
       }
     } catch (err) {
       console.error("Error sending notification:", err.response?.data || err.message);
