@@ -57,8 +57,9 @@ const io = new Server(server, {
   },
 });
 
+// Attach io to request
 app.use((req, res, next) => {
-  req.io = io; // attach io to request
+  req.io = io;
   next();
 });
 

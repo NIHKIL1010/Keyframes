@@ -16,7 +16,6 @@ export default function Contacts() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Hosted backend URL from .env
     const API_URL = process.env.REACT_APP_API_URL || "https://keyframes.onrender.com";
 
     try {
@@ -24,9 +23,9 @@ export default function Contacts() {
         headers: { "Content-Type": "application/json" },
       });
 
-      if (response.data.success || response.status === 200) {
+      if (response.data.success) {
         alert("✅ Message sent successfully!");
-        setFormData({ name: "", email: "", message: "" }); // reset form
+        setFormData({ name: "", email: "", message: "" });
       } else {
         alert("❌ Failed to send message. Try again.");
       }

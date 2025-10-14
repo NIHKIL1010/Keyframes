@@ -1,89 +1,78 @@
-import React, { useEffect, useState } from "react";
-import axios from "axios";
-import { io } from "socket.io-client";
-import "../styles/global.css";
-import "../styles/notifications.css";
+const express = require("express");
+const router = express.Router();
+const Notification = require("../models/Notification");
+const { verifyAdmin } = require("../middleware/authMiddleware");
 
-export default function Notifications() {
-  const [notifications, setNotifications] = useState([]);
-  const userId = localStorage.getItem("userId"); // may be null
-  const token = localStorage.getItem("token");
+// ---------------- GLOBAL NOTIFICATION ----------------
+router.post("/global", verifyAdmin, async (req, res) => {
+  try {
+    const { message } = req.body;
+    if (!message)
+      return res.status(400).json({ success: false, error: "Message required" });
 
-  const API_URL = process.env.REACT_APP_API_URL || "https://keyframes.onrender.com";
+    const notification = new Notification({ message, type: "global" });
+    await notification.save();
 
-  // ------------------ Fetch notifications from backend ------------------
-  const fetchNotifications = async () => {
-    try {
-      // Use /:userId if available, otherwise fallback to safe route "/"
-      const url = userId
-        ? `${API_URL}/api/notifications/${userId}`
-        : `${API_URL}/api/notifications/`;
-
-      const res = await axios.get(url, {
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
-      });
-
-      if (res.data.success) {
-        const sorted = res.data.notifications.sort(
-          (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
-        );
-        setNotifications(sorted);
-      }
-    } catch (err) {
-      console.error(
-        "Error fetching notifications:",
-        err.response?.data || err.message
-      );
-    }
-  };
-
-  // ------------------ Socket.io real-time updates ------------------
-  useEffect(() => {
-    fetchNotifications();
-
-    const socket = io(API_URL, { transports: ["websocket"], withCredentials: true });
-
-    // Register user if userId exists
-    if (userId) {
-      socket.emit("register-user", userId);
+    if (req.io) {
+      req.io.emit("new-notification", { ...notification.toObject(), user: null });
     }
 
-    socket.on("new-notification", (notification) => {
-      if (
-        notification.type === "global" ||
-        (notification.type === "personal" && notification.user?.toString() === userId)
-      ) {
-        setNotifications((prev) => {
-          // avoid duplicates
-          if (prev.some((n) => n._id === notification._id)) return prev;
-          return [notification, ...prev];
-        });
-      }
-    });
+    return res.status(201).json({ success: true, notification });
+  } catch (err) {
+    console.error("Error in /global notification:", err);
+    return res.status(500).json({ success: false, error: err.message });
+  }
+});
 
-    return () => socket.disconnect();
-  }, [userId, API_URL]);
+// ---------------- PERSONAL NOTIFICATION ----------------
+router.post("/personal/:userId", verifyAdmin, async (req, res) => {
+  try {
+    const { message } = req.body;
+    const { userId } = req.params;
+    if (!message || !userId)
+      return res.status(400).json({ success: false, error: "Message & userId required" });
 
-  return (
-    <div className="notifications-page">
-      <h2>Notifications</h2>
-      {notifications.length === 0 ? (
-        <p>No notifications yet</p>
-      ) : (
-        <div className="notifications-list">
-          {notifications.map((notif) => (
-            <div key={notif._id} className={`notification-card ${notif.type}`}>
-              <span className="notif-type">
-                {notif.type === "personal" ? "(Personal) " : "(Global) "}
-              </span>
-              {notif.message}
-              <span className="notif-time">
-                {new Date(notif.createdAt).toLocaleString()}
-              </span>
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-}
+    const notification = new Notification({ message, type: "personal", user: userId });
+    await notification.save();
+
+    if (req.io) {
+      req.io.to(userId).emit("new-notification", notification);
+    }
+
+    return res.status(201).json({ success: true, notification });
+  } catch (err) {
+    console.error("Error in /personal notification:", err);
+    return res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// ---------------- FETCH NOTIFICATIONS BY USER ----------------
+router.get("/:userId", async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const notifications = await Notification.find({
+      $or: [
+        { type: "global" },
+        { type: "personal", user: userId },
+      ],
+    }).sort({ createdAt: -1 });
+
+    return res.json({ success: true, notifications });
+  } catch (err) {
+    console.error("Error fetching notifications:", err);
+    return res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// ---------------- FETCH ALL NOTIFICATIONS (safe route) ----------------
+router.get("/", async (req, res) => {
+  try {
+    const notifications = await Notification.find().sort({ createdAt: -1 });
+    return res.json({ success: true, notifications });
+  } catch (err) {
+    console.error("Error fetching all notifications:", err);
+    return res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+module.exports = router;

@@ -65,7 +65,6 @@ router.get("/:userId", async (req, res) => {
 });
 
 // ---------------- SAFE FETCH ALL NOTIFICATIONS ----------------
-// Prevent 404 if frontend calls /api/notifications/ without userId
 router.get("/", async (req, res) => {
   try {
     const notifications = await Notification.find().sort({ createdAt: -1 });
