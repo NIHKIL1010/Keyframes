@@ -1,4 +1,3 @@
-
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
@@ -15,17 +14,18 @@ const server = http.createServer(app);
 // ------------------------------
 const { Server } = require("socket.io");
 
+const allowedOrigins = [
+  "http://localhost:3000",         // local dev
+  "https://keyframes.vercel.app",  // deployed frontend
+];
+
 const io = new Server(server, {
   cors: {
-    origin: [
-      // "http://localhost:3000",              // for local development
-      "https://keyframes.onrender.com", // replace with your actual frontend Render/Vercel URL
-    ],
-    methods: ["GET", "POST"],3
+    origin: allowedOrigins,
+    methods: ["GET", "POST"],
     credentials: true,
   },
 });
-
 
 app.use((req, res, next) => {
   req.io = io; // attach io to request
@@ -33,20 +33,24 @@ app.use((req, res, next) => {
 });
 
 // ------------------------------
-// MIDDLEWARE
+// CORS MIDDLEWARE
 // ------------------------------
 app.use(
   cors({
-    origin: [
-      "http://localhost:3000",              // for local development
-      "https://keyframes.onrender.com", // replace with your actual deployed frontend URL
-    ],
+    origin: function (origin, callback) {
+      // allow requests with no origin (like Postman or mobile apps)
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.indexOf(origin) === -1) {
+        const msg = `The CORS policy for this site does not allow access from the specified Origin.`;
+        return callback(new Error(msg), false);
+      }
+      return callback(null, true);
+    },
     credentials: true,
   })
 );
 
 app.use(express.json());
-
 
 // ------------------------------
 // ROUTES
@@ -56,12 +60,15 @@ const userRoutes = require("./routes/user");
 const contactRoutes = require("./routes/contacts");
 const adminRoutes = require("./routes/admin");
 const notificationRoutes = require("./routes/notifications");
+const paymentRoutes = require("./routes/payment");
 
 app.use("/api/auth", authRoutes);
 app.use("/api/user", userRoutes);
 app.use("/api/contacts", contactRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/notifications", notificationRoutes);
+app.use("/api/payment", paymentRoutes);
+app.use("/uploads", express.static("uploads")); // serve uploaded screenshots
 
 // ------------------------------
 // DATABASE CONNECTION
@@ -77,23 +84,11 @@ mongoose
 app.get("/", (req, res) => res.send("✅ Backend server running!"));
 
 // ------------------------------
-// START SERVER
+// SOCKET.IO CONNECTION
 // ------------------------------
-const PORT = process.env.PORT || 5000;
-server.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
-
-// ------------------------------
-// PAYMENT ROUTE
-// ------------------------------
-const paymentRoutes = require("./routes/payment");
-app.use("/api/payment", paymentRoutes);
-app.use("/uploads", express.static("uploads")); // serve uploaded screenshots
-
-//notification io socket
 io.on("connection", (socket) => {
   console.log("🟢 A user connected:", socket.id);
 
-  // When frontend connects, it should send its userId once
   socket.on("register-user", (userId) => {
     if (userId) {
       socket.join(userId);
@@ -105,3 +100,9 @@ io.on("connection", (socket) => {
     console.log("🔴 A user disconnected:", socket.id);
   });
 });
+
+// ------------------------------
+// START SERVER
+// ------------------------------
+const PORT = process.env.PORT || 5000;
+server.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
