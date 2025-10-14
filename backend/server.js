@@ -18,10 +18,10 @@ const { Server } = require("socket.io");
 const io = new Server(server, {
   cors: {
     origin: [
-      "http://localhost:3000",              // for local development
+      // "http://localhost:3000",              // for local development
       "https://keyframes.onrender.com", // replace with your actual frontend Render/Vercel URL
     ],
-    methods: ["GET", "POST"],
+    methods: ["GET", "POST"],3
     credentials: true,
   },
 });
