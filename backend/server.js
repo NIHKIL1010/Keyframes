@@ -12,23 +12,26 @@ const server = http.createServer(app);
 // ALLOWED ORIGINS
 // ------------------------------
 const allowedOrigins = [
-  "http://localhost:3000",         // Local development
-  "https://keyframes.vercel.app",  // Deployed frontend
+  "http://localhost:3000",
+  "https://keyframes.vercel.app",
 ];
 
 // ------------------------------
-// CORS MIDDLEWARE (Permanent fix)
+// GLOBAL CORS MIDDLEWARE
 // ------------------------------
 app.use((req, res, next) => {
   const origin = req.headers.origin;
   if (allowedOrigins.includes(origin)) {
     res.header("Access-Control-Allow-Origin", origin);
   }
-  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
+  res.header(
+    "Access-Control-Allow-Headers",
+    "Origin, X-Requested-With, Content-Type, Accept, Authorization"
+  );
   res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
   res.header("Access-Control-Allow-Credentials", "true");
 
-  // If it's a preflight request, respond immediately
+  // Preflight OPTIONS request
   if (req.method === "OPTIONS") {
     return res.sendStatus(204);
   }
