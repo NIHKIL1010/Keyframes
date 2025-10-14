@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { io } from "socket.io-client";
@@ -10,9 +9,11 @@ export default function Notifications() {
   const userId = localStorage.getItem("userId");
   const token = localStorage.getItem("token");
 
+  const API_URL = process.env.REACT_APP_API_URL || "https://keyframes.onrender.com";
+
   const fetchNotifications = async () => {
     try {
-      const res = await axios.get(`http://localhost:5000/api/notifications/${userId}`, {
+      const res = await axios.get(`${API_URL}/api/notifications/${userId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -30,7 +31,7 @@ export default function Notifications() {
   useEffect(() => {
     fetchNotifications();
 
-    const socket = io("http://localhost:5000");
+    const socket = io(API_URL);
     socket.emit("register-user", userId);
 
     socket.on("new-notification", (notification) => {

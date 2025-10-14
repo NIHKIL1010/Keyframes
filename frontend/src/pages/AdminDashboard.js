@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import "../styles/global.css";
@@ -24,9 +23,13 @@ export default function AdminDashboard() {
   const userId = localStorage.getItem("userId");
   const token = localStorage.getItem("token");
 
+  // Use hosted backend URL from environment variable
+  const API_URL = process.env.REACT_APP_API_URL || "https://keyframes.onrender.com";
+
   // ------------------ SOCKET.IO ------------------
   useEffect(() => {
-    const socket = io("http://localhost:5000");
+    const socket = io(API_URL, { withCredentials: true, transports: ["websocket"] });
+
     socket.emit("register-user", userId);
 
     socket.on("new-notification", (notification) => {
@@ -44,12 +47,12 @@ export default function AdminDashboard() {
     socket.on("update-insights", (updated) => setInsights(updated));
 
     return () => socket.disconnect();
-  }, [userId]);
+  }, [userId, API_URL]);
 
   // ------------------ Fetch Functions ------------------
   const fetchUsers = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/admin/users", {
+      const res = await axios.get(`${API_URL}/api/admin/users`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setUsers(res.data);
@@ -60,7 +63,7 @@ export default function AdminDashboard() {
 
   const fetchInsights = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/admin/insights", {
+      const res = await axios.get(`${API_URL}/api/admin/insights`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setInsights(res.data);
@@ -71,7 +74,7 @@ export default function AdminDashboard() {
 
   const fetchNotifications = async () => {
     try {
-      const res = await axios.get(`http://localhost:5000/api/notifications/${userId}`, {
+      const res = await axios.get(`${API_URL}/api/notifications/${userId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (res.data.success) {
@@ -89,13 +92,13 @@ export default function AdminDashboard() {
     fetchUsers();
     fetchInsights();
     fetchNotifications();
-  }, []);
+  }, [API_URL]);
 
   // ------------------ Actions ------------------
   const handleBlock = async (userId) => {
     try {
       await axios.patch(
-        `http://localhost:5000/api/admin/users/${userId}/block`,
+        `${API_URL}/api/admin/users/${userId}/block`,
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -110,7 +113,7 @@ export default function AdminDashboard() {
     try {
       const newRole = currentRole === "user" ? "admin" : "user";
       await axios.patch(
-        `http://localhost:5000/api/admin/users/${userId}/role`,
+        `${API_URL}/api/admin/users/${userId}/role`,
         { role: newRole },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -126,8 +129,8 @@ export default function AdminDashboard() {
       if (!notificationMessage.trim()) return alert("Please enter a message");
 
       const url = selectedUser
-        ? `http://localhost:5000/api/notifications/personal/${selectedUser}`
-        : `http://localhost:5000/api/notifications/global`;
+        ? `${API_URL}/api/notifications/personal/${selectedUser}`
+        : `${API_URL}/api/notifications/global`;
 
       const res = await axios.post(
         url,

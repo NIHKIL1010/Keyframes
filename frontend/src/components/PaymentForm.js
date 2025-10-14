@@ -38,14 +38,17 @@ export default function PaymentForm() {
     data.append("plan", selectedPlan);
     data.append("screenshot", formData.screenshot);
 
-    try {
-      await axios.post("http://localhost:5000/api/payment", data);
-      setSubmitted(true);
-    } catch (err) {
-      console.error(err);
-      alert("Error submitting form. Try again.");
-    }
-  };
+   try {
+  await axios.post(
+    `${process.env.REACT_APP_API_URL || "http://localhost:5000"}/api/payment`,
+    data
+  );
+  setSubmitted(true);
+} catch (err) {
+  console.error(err);
+  alert("Error submitting form. Try again.");
+}
+
 
   if (submitted)
     return (

@@ -14,9 +14,18 @@ const server = http.createServer(app);
 // SOCKET.IO
 // ------------------------------
 const { Server } = require("socket.io");
+
 const io = new Server(server, {
-  cors: { origin: "http://localhost:3000", methods: ["GET", "POST"] },
+  cors: {
+    origin: [
+      "http://localhost:3000",              // for local development
+      "https://keyframes.onrender.com", // replace with your actual frontend Render/Vercel URL
+    ],
+    methods: ["GET", "POST"],
+    credentials: true,
+  },
 });
+
 
 app.use((req, res, next) => {
   req.io = io; // attach io to request
@@ -26,8 +35,18 @@ app.use((req, res, next) => {
 // ------------------------------
 // MIDDLEWARE
 // ------------------------------
-app.use(cors({ origin: "http://localhost:3000", credentials: true }));
+app.use(
+  cors({
+    origin: [
+      "http://localhost:3000",              // for local development
+      "https://keyframes.onrender.com", // replace with your actual deployed frontend URL
+    ],
+    credentials: true,
+  })
+);
+
 app.use(express.json());
+
 
 // ------------------------------
 // ROUTES

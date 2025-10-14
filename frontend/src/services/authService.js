@@ -1,6 +1,9 @@
 import axios from "axios";
 
-const API_URL = "http://localhost:5000/api/auth";
+// Use environment variable or fallback to Render-hosted URL
+const API_URL = process.env.REACT_APP_API_URL
+  ? `${process.env.REACT_APP_API_URL}/api/auth`
+  : "https://keyframes.onrender.com/api/auth";
 
 export const loginUser = async (email, password) => {
   try {
@@ -11,4 +14,3 @@ export const loginUser = async (email, password) => {
     throw error.response ? error.response.data : { message: "Server error" };
   }
 };
-

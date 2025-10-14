@@ -1,5 +1,3 @@
-
-
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
@@ -8,6 +6,9 @@ export default function MyAccount() {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+
+  // Hosted backend URL
+  const API_URL = process.env.REACT_APP_API_URL || "https://keyframes.onrender.com";
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -18,7 +19,7 @@ export default function MyAccount() {
 
     const fetchUser = async () => {
       try {
-        const res = await axios.get("http://localhost:5000/api/user/me", {
+        const res = await axios.get(`${API_URL}/api/user/me`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         console.log(res.data); // check returned data
@@ -87,4 +88,3 @@ export default function MyAccount() {
     </div>
   );
 }
-

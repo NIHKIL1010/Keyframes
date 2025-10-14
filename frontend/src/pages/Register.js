@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
@@ -13,12 +12,14 @@ export default function Register() {
   const [role, setRole] = useState(""); // user or admin
   const [error, setError] = useState("");
 
+  const API_URL = process.env.REACT_APP_API_URL || "https://keyframes.onrender.com";
+
   const handleRegister = async (e) => {
     e.preventDefault();
     setError("");
 
     try {
-      const response = await axios.post("http://localhost:5000/api/auth/register", {
+      const response = await axios.post(`${API_URL}/api/auth/register`, {
         name,
         email,
         phone,

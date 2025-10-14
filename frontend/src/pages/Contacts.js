@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import axios from "axios";
 import "../styles/contacts.css";
@@ -16,14 +15,20 @@ export default function Contacts() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // Use hosted backend URL
+    const API_URL = process.env.REACT_APP_API_URL || "https://keyframes.onrender.com";
+
     try {
-      await axios.post("http://localhost:5000/api/contacts/add", formData);
- // ✅ fixed
-      alert("Message sent successfully!");
+      await axios.post(`${API_URL}/api/contacts/add`, formData, {
+        headers: { "Content-Type": "application/json" },
+      });
+
+      alert("✅ Message sent successfully!");
       setFormData({ name: "", email: "", message: "" }); // reset form
     } catch (error) {
-      console.error("Error:", error.response?.data || error.message);
-      alert("Failed to send message");
+      console.error("Error submitting contact form:", error.response?.data || error.message);
+      alert("❌ Failed to send message. Try again.");
     }
   };
 
@@ -59,4 +64,3 @@ export default function Contacts() {
     </div>
   );
 }
-
