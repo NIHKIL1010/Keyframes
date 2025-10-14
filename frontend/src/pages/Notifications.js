@@ -6,7 +6,7 @@ import "../styles/notifications.css";
 
 export default function Notifications() {
   const [notifications, setNotifications] = useState([]);
-  const userId = localStorage.getItem("userId");
+  const userId = localStorage.getItem("userId"); // may be null
   const token = localStorage.getItem("token");
 
   const API_URL = process.env.REACT_APP_API_URL || "https://keyframes.onrender.com";
@@ -14,8 +14,13 @@ export default function Notifications() {
   // ------------------ Fetch notifications from backend ------------------
   const fetchNotifications = async () => {
     try {
-      const res = await axios.get(`${API_URL}/api/notifications/${userId}`, {
-        headers: { Authorization: `Bearer ${token}` },
+      // Use /:userId if available, otherwise fallback to safe route "/"
+      const url = userId
+        ? `${API_URL}/api/notifications/${userId}`
+        : `${API_URL}/api/notifications/`;
+
+      const res = await axios.get(url, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
       });
 
       if (res.data.success) {
@@ -25,7 +30,10 @@ export default function Notifications() {
         setNotifications(sorted);
       }
     } catch (err) {
-      console.error("Error fetching notifications:", err.response?.data || err.message);
+      console.error(
+        "Error fetching notifications:",
+        err.response?.data || err.message
+      );
     }
   };
 
@@ -34,7 +42,11 @@ export default function Notifications() {
     fetchNotifications();
 
     const socket = io(API_URL, { transports: ["websocket"], withCredentials: true });
-    socket.emit("register-user", userId);
+
+    // Register user if userId exists
+    if (userId) {
+      socket.emit("register-user", userId);
+    }
 
     socket.on("new-notification", (notification) => {
       if (
@@ -42,6 +54,7 @@ export default function Notifications() {
         (notification.type === "personal" && notification.user?.toString() === userId)
       ) {
         setNotifications((prev) => {
+          // avoid duplicates
           if (prev.some((n) => n._id === notification._id)) return prev;
           return [notification, ...prev];
         });

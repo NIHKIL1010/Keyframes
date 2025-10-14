@@ -1,5 +1,3 @@
-
-
 const express = require("express");
 const router = express.Router();
 const Notification = require("../models/Notification");
@@ -48,7 +46,7 @@ router.post("/personal/:userId", verifyAdmin, async (req, res) => {
   }
 });
 
-// ---------------- FETCH NOTIFICATIONS ----------------
+// ---------------- FETCH NOTIFICATIONS BY USER ----------------
 router.get("/:userId", async (req, res) => {
   try {
     const { userId } = req.params;
@@ -66,5 +64,16 @@ router.get("/:userId", async (req, res) => {
   }
 });
 
-module.exports = router;
+// ---------------- SAFE FETCH ALL NOTIFICATIONS ----------------
+// Prevent 404 if frontend calls /api/notifications/ without userId
+router.get("/", async (req, res) => {
+  try {
+    const notifications = await Notification.find().sort({ createdAt: -1 });
+    return res.json({ success: true, notifications });
+  } catch (err) {
+    console.error("Error fetching all notifications:", err);
+    return res.status(500).json({ success: false, error: err.message });
+  }
+});
 
+module.exports = router;
