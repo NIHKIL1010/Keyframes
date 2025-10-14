@@ -18,6 +18,8 @@ export default function PaymentForm() {
   const [preview, setPreview] = useState(null);
   const [submitted, setSubmitted] = useState(false);
 
+  const API_URL = process.env.REACT_APP_API_URL || "https://keyframes.onrender.com";
+
   const handleChange = (e) => {
     const { name, value, files } = e.target;
     if (name === "screenshot") {
@@ -45,14 +47,18 @@ export default function PaymentForm() {
     data.append("screenshot", formData.screenshot);
 
     try {
-      await axios.post(
-        `${process.env.REACT_APP_API_URL || "http://localhost:5000"}/api/payment`,
-        data
-      );
-      setSubmitted(true);
+      const response = await axios.post(`${API_URL}/api/payment`, data, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+
+      if (response.data.success || response.status === 200) {
+        setSubmitted(true);
+      } else {
+        alert("❌ Failed to submit payment. Try again.");
+      }
     } catch (err) {
       console.error("Payment submission error:", err.response?.data || err.message);
-      alert("Error submitting form. Try again.");
+      alert("❌ Error submitting form. Try again.");
     }
   };
 

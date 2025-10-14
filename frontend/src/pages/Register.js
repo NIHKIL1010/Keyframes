@@ -12,6 +12,7 @@ export default function Register() {
   const [role, setRole] = useState(""); // user or admin
   const [error, setError] = useState("");
 
+  // Use hosted backend URL
   const API_URL = process.env.REACT_APP_API_URL || "https://keyframes.onrender.com";
 
   const handleRegister = async (e) => {
@@ -30,9 +31,12 @@ export default function Register() {
       if (response.status === 201) {
         alert("Registration successful!");
         navigate("/login");
+      } else {
+        setError("Registration failed. Please try again.");
       }
     } catch (err) {
-      setError(err.response?.data?.message || "Registration failed");
+      console.error("Registration Error:", err);
+      setError(err.response?.data?.message || "Registration failed. Check console for details.");
     }
   };
 

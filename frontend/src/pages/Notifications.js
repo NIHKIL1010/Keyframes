@@ -11,6 +11,7 @@ export default function Notifications() {
 
   const API_URL = process.env.REACT_APP_API_URL || "https://keyframes.onrender.com";
 
+  // ------------------ Fetch notifications from backend ------------------
   const fetchNotifications = async () => {
     try {
       const res = await axios.get(`${API_URL}/api/notifications/${userId}`, {
@@ -24,14 +25,15 @@ export default function Notifications() {
         setNotifications(sorted);
       }
     } catch (err) {
-      console.error("Error fetching notifications:", err);
+      console.error("Error fetching notifications:", err.response?.data || err.message);
     }
   };
 
+  // ------------------ Socket.io real-time updates ------------------
   useEffect(() => {
     fetchNotifications();
 
-    const socket = io(API_URL);
+    const socket = io(API_URL, { transports: ["websocket"], withCredentials: true });
     socket.emit("register-user", userId);
 
     socket.on("new-notification", (notification) => {
@@ -47,7 +49,7 @@ export default function Notifications() {
     });
 
     return () => socket.disconnect();
-  }, [userId]);
+  }, [userId, API_URL]);
 
   return (
     <div className="notifications-page">

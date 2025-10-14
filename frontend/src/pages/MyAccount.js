@@ -13,7 +13,7 @@ export default function MyAccount() {
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (!token) {
-      navigate("/");
+      navigate("/login");
       return;
     }
 
@@ -22,27 +22,33 @@ export default function MyAccount() {
         const res = await axios.get(`${API_URL}/api/user/me`, {
           headers: { Authorization: `Bearer ${token}` },
         });
-        console.log(res.data); // check returned data
         setUser(res.data);
       } catch (err) {
-        console.error("Failed to fetch user info:", err);
+        console.error("Failed to fetch user info:", err.response?.data || err.message);
         localStorage.removeItem("token");
-        navigate("/");
+        navigate("/login");
       } finally {
         setLoading(false);
       }
     };
 
     fetchUser();
-  }, [navigate]);
+  }, [navigate, API_URL]);
 
   const handleLogout = () => {
-    localStorage.removeItem("token");
-    navigate("/");
+    localStorage.clear();
+    navigate("/login");
   };
 
   return (
-    <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100vh" }}>
+    <div
+      style={{
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        height: "100vh",
+      }}
+    >
       <div
         style={{
           textAlign: "center",
@@ -53,8 +59,14 @@ export default function MyAccount() {
           boxShadow: "0 8px 20px rgba(0,0,0,0.5)",
           transition: "transform 0.3s, box-shadow 0.3s",
         }}
-        onMouseEnter={(e) => { e.currentTarget.style.transform = "scale(1.05)"; e.currentTarget.style.boxShadow = "0 12px 25px rgba(0,0,0,0.7)"; }}
-        onMouseLeave={(e) => { e.currentTarget.style.transform = "scale(1)"; e.currentTarget.style.boxShadow = "0 8px 20px rgba(0,0,0,0.5)"; }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.transform = "scale(1.05)";
+          e.currentTarget.style.boxShadow = "0 12px 25px rgba(0,0,0,0.7)";
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.transform = "scale(1)";
+          e.currentTarget.style.boxShadow = "0 8px 20px rgba(0,0,0,0.5)";
+        }}
       >
         <h2 style={{ color: "#fff" }}>My Account</h2>
         {loading ? (

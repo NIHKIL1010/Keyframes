@@ -23,13 +23,12 @@ export default function AdminDashboard() {
   const userId = localStorage.getItem("userId");
   const token = localStorage.getItem("token");
 
-  // Use hosted backend URL from environment variable
+  // Hosted backend URL
   const API_URL = process.env.REACT_APP_API_URL || "https://keyframes.onrender.com";
 
   // ------------------ SOCKET.IO ------------------
   useEffect(() => {
     const socket = io(API_URL, { withCredentials: true, transports: ["websocket"] });
-
     socket.emit("register-user", userId);
 
     socket.on("new-notification", (notification) => {
@@ -145,7 +144,7 @@ export default function AdminDashboard() {
         alert("✅ Notification sent successfully!");
       } else {
         console.error("Backend rejected request:", res.data);
-        alert("❌ Failed: " + res.data.error || res.data.message);
+        alert("❌ Failed: " + (res.data.error || res.data.message));
       }
     } catch (err) {
       console.error("Error sending notification:", err.response?.data || err.message);

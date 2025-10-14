@@ -24,7 +24,7 @@ export default function Login() {
         password,
       });
 
-      const { token, role, name } = response.data;
+      const { token, role, name, userId } = response.data;
 
       if (!token) {
         setError("Login failed: token missing.");
@@ -35,7 +35,7 @@ export default function Login() {
       localStorage.setItem("token", token);
       localStorage.setItem("role", role);
       localStorage.setItem("name", name);
-      localStorage.setItem("userId", response.data.userId || ""); // optional if returned
+      localStorage.setItem("userId", userId || "");
 
       // Navigate based on role
       if (role === "admin") {

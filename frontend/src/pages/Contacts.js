@@ -16,16 +16,20 @@ export default function Contacts() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Use hosted backend URL
+    // Hosted backend URL from .env
     const API_URL = process.env.REACT_APP_API_URL || "https://keyframes.onrender.com";
 
     try {
-      await axios.post(`${API_URL}/api/contacts/add`, formData, {
+      const response = await axios.post(`${API_URL}/api/contacts/add`, formData, {
         headers: { "Content-Type": "application/json" },
       });
 
-      alert("✅ Message sent successfully!");
-      setFormData({ name: "", email: "", message: "" }); // reset form
+      if (response.data.success || response.status === 200) {
+        alert("✅ Message sent successfully!");
+        setFormData({ name: "", email: "", message: "" }); // reset form
+      } else {
+        alert("❌ Failed to send message. Try again.");
+      }
     } catch (error) {
       console.error("Error submitting contact form:", error.response?.data || error.message);
       alert("❌ Failed to send message. Try again.");
