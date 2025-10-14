@@ -10,27 +10,12 @@ const app = express();
 const server = http.createServer(app);
 
 // ------------------------------
-// SOCKET.IO
+// ALLOWED ORIGINS
 // ------------------------------
-const { Server } = require("socket.io");
-
 const allowedOrigins = [
-  "http://localhost:3000",         // local dev
-  "https://keyframes.vercel.app",  // deployed frontend
+  "http://localhost:3000",         // Local development
+  "https://keyframes.vercel.app",  // Deployed frontend
 ];
-
-const io = new Server(server, {
-  cors: {
-    origin: allowedOrigins,
-    methods: ["GET", "POST"],
-    credentials: true,
-  },
-});
-
-app.use((req, res, next) => {
-  req.io = io; // attach io to request
-  next();
-});
 
 // ------------------------------
 // CORS MIDDLEWARE
@@ -46,11 +31,42 @@ app.use(
       }
       return callback(null, true);
     },
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true,
   })
 );
 
+// Handle preflight OPTIONS requests
+app.options("*", cors({
+  origin: allowedOrigins,
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+  credentials: true,
+}));
+
+// ------------------------------
+// BODY PARSER
+// ------------------------------
 app.use(express.json());
+
+// ------------------------------
+// SOCKET.IO
+// ------------------------------
+const { Server } = require("socket.io");
+
+const io = new Server(server, {
+  cors: {
+    origin: allowedOrigins,
+    methods: ["GET", "POST"],
+    credentials: true,
+  },
+});
+
+app.use((req, res, next) => {
+  req.io = io; // attach io to request
+  next();
+});
 
 // ------------------------------
 // ROUTES
