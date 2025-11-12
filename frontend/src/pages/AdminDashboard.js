@@ -170,7 +170,7 @@ export default function AdminDashboard() {
         <h1>Admin Dashboard</h1>
         <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
           <button className="primary-btn" onClick={markAllRead}>
-            Mark all notifications read
+            Welcome! Admin
           </button>
           <button className="logout-btn" onClick={handleLogout}>
             Logout

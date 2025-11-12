@@ -290,13 +290,30 @@ router.get("/insights", adminMiddleware, async (req, res) => {
     const blockedUsers = await User.countDocuments({ isBlocked: true });
     const activeUsers = totalUsers - blockedUsers;
 
+    // New users today
+    const startOfToday = new Date();
+    startOfToday.setHours(0, 0, 0, 0);
+
+    const newUsersToday = await User.countDocuments({ createdAt: { $gte: startOfToday } });
+
+    // Pending approvals (if you have a field like isApproved)
+    // Otherwise, you can skip or set 0
+    const pendingApprovals = await User.countDocuments({ isApproved: false });
+
     const recentActivities = await ActivityLog.find()
       .populate("performedBy", "name email")
       .populate("user", "name email")
       .sort({ createdAt: -1 })
       .limit(10);
 
-    res.status(200).json({ totalUsers, activeUsers, blockedUsers, recentActivities });
+    res.status(200).json({ 
+      totalUsers, 
+      activeUsers, 
+      blockedUsers, 
+      newUsersToday,      // <-- added
+      pendingApprovals,   // <-- added
+      recentActivities
+    });
   } catch (err) {
     console.error("Error fetching insights:", err);
     res.status(500).json({ message: "Server error" });
